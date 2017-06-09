@@ -43,4 +43,7 @@ public interface CarService {
     void delete(Long id);
 
     List<Car> findAllByExampleOf(Car car);
+
+
+    List<Car> findAllByAvailableTrue();
 }

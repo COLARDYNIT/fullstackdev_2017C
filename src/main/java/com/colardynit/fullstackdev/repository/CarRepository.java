@@ -20,4 +20,5 @@ public interface CarRepository extends JpaRepository<Car,Long> {
     @Query("select car from Car car left join fetch car.categories where car.id =:id")
     Car findOneWithEagerRelationships(@Param("id") Long id);
 
+    List<Car> findAllByAvailable(boolean b);
 }

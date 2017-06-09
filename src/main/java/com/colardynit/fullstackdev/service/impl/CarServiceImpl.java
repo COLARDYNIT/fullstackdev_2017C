@@ -101,4 +101,9 @@ public class CarServiceImpl implements CarService{
         List<Car> cars = carRepository.findAll(example);
         return cars;
     }
+
+    @Override
+    public List<Car> findAllByAvailableTrue() {
+        return carRepository.findAllByAvailable(true);
+    }
 }

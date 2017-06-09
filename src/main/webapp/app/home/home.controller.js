@@ -5,10 +5,20 @@
         .module('fullstackdev2017CApp')
         .controller('HomeController', HomeController);
 
-    HomeController.$inject = ['$scope', 'Principal', 'LoginService', '$state'];
+    HomeController.$inject = ['$scope', 'Principal', 'LoginService', '$state','$http'];
 
-    function HomeController ($scope, Principal, LoginService, $state) {
+    function HomeController ($scope, Principal, LoginService, $state,$http) {
         var vm = this;
+
+        $http({
+            method: 'GET',
+            url: 'http://localhost:8080/api/availablecars'
+        }).then(function successCallback(response) {
+            vm.cars = response.data;
+
+        }, function errorCallback(response) {
+
+        });
 
         vm.account = null;
         vm.isAuthenticated = null;
@@ -18,6 +28,8 @@
             getAccount();
         });
 
+
+
         getAccount();
 
         function getAccount() {
@@ -26,8 +38,10 @@
                 vm.isAuthenticated = Principal.isAuthenticated;
             });
         }
+
         function register () {
             $state.go('register');
         }
+
     }
 })();

@@ -1,14 +1,13 @@
 package com.colardynit.fullstackdev.domain;
 
+import com.colardynit.fullstackdev.domain.enumeration.Type;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.HashSet;
-import java.util.Set;
 import java.util.Objects;
-
-import com.colardynit.fullstackdev.domain.enumeration.Type;
+import java.util.Set;
 
 /**
  * A Category.
@@ -71,10 +70,6 @@ public class Category implements Serializable {
         this.cars.remove(car);
         car.getCategories().remove(this);
         return this;
-    }
-
-    public void setCars(Set<Car> cars) {
-        this.cars = cars;
     }
 
     @Override

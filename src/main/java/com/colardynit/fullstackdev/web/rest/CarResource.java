@@ -95,6 +95,12 @@ public class CarResource {
         return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
     }
 
+    @CrossOrigin
+    @GetMapping("/availablecars")
+    public List<Car> getAllAvailableCars(){
+        return carService.findAllByAvailableTrue();
+    }
+
     /**
      * GET  /cars/:id : get the "id" car.
      *
