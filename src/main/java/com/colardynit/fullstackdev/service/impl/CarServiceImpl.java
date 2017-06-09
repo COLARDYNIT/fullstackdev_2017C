@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.contains;
@@ -26,12 +27,8 @@ import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatc
 public class CarServiceImpl implements CarService{
 
     private final Logger log = LoggerFactory.getLogger(CarServiceImpl.class);
-
-    private final CarRepository carRepository;
-
-    public CarServiceImpl(CarRepository carRepository) {
-        this.carRepository = carRepository;
-    }
+    @Resource
+    private CarRepository carRepository;
 
     /**
      * Save a car.
