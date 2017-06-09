@@ -1,0 +1,24 @@
+{
+    "fluentMethods": true,
+    "relationships": [
+        {
+            "relationshipType": "many-to-many",
+            "relationshipName": "car",
+            "otherEntityName": "car",
+            "ownerSide": false,
+            "otherEntityRelationshipName": "category"
+        }
+    ],
+    "fields": [
+        {
+            "fieldName": "type",
+            "fieldType": "Type",
+            "fieldValues": "SPORT,CITY,FAMILY,SUV"
+        }
+    ],
+    "changelogDate": "20170609091752",
+    "entityTableName": "category",
+    "dto": "no",
+    "pagination": "pager",
+    "service": "serviceImpl"
+}

@@ -1,0 +1,34 @@
+entity Customer {
+	name String
+}
+
+entity Rental {
+	startDate LocalDate,
+    endDate LocalDate
+}
+
+entity Car {
+	model String,
+	available Boolean
+}
+entity Brand {
+	name String
+}
+entity Category{
+ type Type
+}
+enum Type {
+    SPORT, CITY, FAMILY, SUV
+}
+// defining multiple OneToMany relationships with comments
+relationship ManyToMany{
+	Car{Category} to Category{Car}
+}
+relationship ManyToOne{
+	Car{Brand} to Brand,
+    Rental{Car} to Car,
+    Rental{Customer} to Customer
+}
+// Set service options to all except few
+service all with serviceImpl
+paginate all with pager
