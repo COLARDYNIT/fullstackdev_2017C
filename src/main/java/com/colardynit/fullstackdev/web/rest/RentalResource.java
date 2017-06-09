@@ -1,12 +1,14 @@
 package com.colardynit.fullstackdev.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
+import com.colardynit.fullstackdev.domain.Car;
 import com.colardynit.fullstackdev.domain.Rental;
+import com.colardynit.fullstackdev.service.CarService;
 import com.colardynit.fullstackdev.service.RentalService;
 import com.colardynit.fullstackdev.web.rest.util.HeaderUtil;
 import com.colardynit.fullstackdev.web.rest.util.PaginationUtil;
-import io.swagger.annotations.ApiParam;
 import io.github.jhipster.web.util.ResponseUtil;
+import io.swagger.annotations.ApiParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -16,9 +18,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import java.net.URI;
 import java.net.URISyntaxException;
-
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,12 +35,11 @@ public class RentalResource {
     private final Logger log = LoggerFactory.getLogger(RentalResource.class);
 
     private static final String ENTITY_NAME = "rental";
+    @Resource
+    private RentalService rentalService;
+    @Resource
+    private CarService carService;
 
-    private final RentalService rentalService;
-
-    public RentalResource(RentalService rentalService) {
-        this.rentalService = rentalService;
-    }
 
     /**
      * POST  /rentals : Create a new rental.
@@ -53,10 +55,30 @@ public class RentalResource {
         if (rental.getId() != null) {
             return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "idexists", "A new rental cannot already have an ID")).body(null);
         }
+        if ( rental.getCar() != null){
+            Car car = checkRentalPeriodAndSetCarAvailable(rental);
+            rental.setCar(car);
+        }
+
         Rental result = rentalService.save(rental);
         return ResponseEntity.created(new URI("/api/rentals/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
             .body(result);
+    }
+
+    private Car checkRentalPeriodAndSetCarAvailable(@RequestBody Rental rental) {
+        Car rentalCar = rental.getCar();
+        LocalDate now = LocalDate.now();
+        LocalDate startDate = rental.getStartDate();
+        LocalDate endDate = rental.getEndDate();
+        if(startDate != null && endDate != null) {
+            if (startDate.isBefore(now) && endDate.isAfter(now)) {
+                rentalCar.setAvailable(false);
+            } else {
+                rentalCar.setAvailable(true);
+            }
+            return carService.save(rentalCar);
+        }else return null;
     }
 
     /**
@@ -75,6 +97,8 @@ public class RentalResource {
         if (rental.getId() == null) {
             return createRental(rental);
         }
+        Car car = checkRentalPeriodAndSetCarAvailable(rental);
+        rental.setCar(car);
         Rental result = rentalService.save(rental);
         return ResponseEntity.ok()
             .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, rental.getId().toString()))

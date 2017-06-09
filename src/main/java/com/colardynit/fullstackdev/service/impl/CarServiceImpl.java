@@ -83,14 +83,20 @@ public class CarServiceImpl implements CarService{
     public List<Car> findAllByExampleOf(Car car) {
         if (car == null) {
             car = new Car();
-            car.setAvailable(true); //only show the available cars
         }
-        ExampleMatcher matcher = ExampleMatcher.matching().withIgnoreCase().withIgnoreNullValues()
+
+
+        Car exampleCar = new Car();
+        exampleCar.setModel(car.getModel());
+        exampleCar.setBrand(car.getBrand());
+        exampleCar.setAvailable(true);
+        exampleCar.setCategories(car.getCategories());
+
+        ExampleMatcher matcher = ExampleMatcher.matching().withIgnoreNullValues()
             .withMatcher("name", contains().ignoreCase())
             .withMatcher("brand", exact())
-            .withMatcher("available", exact())
-            .withMatcher("categories", contains());
-        Example<Car> example = Example.of(car, matcher);
+            .withMatcher("available", exact());
+        Example<Car> example = Example.of(exampleCar, matcher);
 
         List<Car> cars = carRepository.findAll(example);
         return cars;

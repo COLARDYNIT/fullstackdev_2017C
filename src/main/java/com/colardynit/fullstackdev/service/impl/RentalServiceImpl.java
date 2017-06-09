@@ -10,6 +10,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
+
 
 /**
  * Service Implementation for managing Rental.
@@ -19,12 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class RentalServiceImpl implements RentalService{
 
     private final Logger log = LoggerFactory.getLogger(RentalServiceImpl.class);
-
-    private final RentalRepository rentalRepository;
-
-    public RentalServiceImpl(RentalRepository rentalRepository) {
-        this.rentalRepository = rentalRepository;
-    }
+    @Resource
+    private RentalRepository rentalRepository;
 
     /**
      * Save a rental.

@@ -7,12 +7,6 @@
         Added the constraints for entity Category.
     -->
     <changeSet id="20170609091752-2" author="jhipster">
-        
-        <addForeignKeyConstraint baseColumnNames="car_id"
-                                 baseTableName="category"
-                                 constraintName="fk_category_car_id"
-                                 referencedColumnNames="id"
-                                 referencedTableName="car"/>
 
     </changeSet>
 </databaseChangeLog>

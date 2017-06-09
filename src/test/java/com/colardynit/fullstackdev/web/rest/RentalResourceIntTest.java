@@ -1,12 +1,9 @@
 package com.colardynit.fullstackdev.web.rest;
 
 import com.colardynit.fullstackdev.Fullstackdev2017CApp;
-
 import com.colardynit.fullstackdev.domain.Rental;
 import com.colardynit.fullstackdev.repository.RentalRepository;
-import com.colardynit.fullstackdev.service.RentalService;
 import com.colardynit.fullstackdev.web.rest.errors.ExceptionTranslator;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,7 +11,6 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
-import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -27,9 +23,8 @@ import java.time.ZoneId;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.hasItem;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Test class for the RentalResource REST controller.
@@ -50,9 +45,6 @@ public class RentalResourceIntTest {
     private RentalRepository rentalRepository;
 
     @Autowired
-    private RentalService rentalService;
-
-    @Autowired
     private MappingJackson2HttpMessageConverter jacksonMessageConverter;
 
     @Autowired
@@ -71,7 +63,7 @@ public class RentalResourceIntTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        RentalResource rentalResource = new RentalResource(rentalService);
+        RentalResource rentalResource = new RentalResource();
         this.restRentalMockMvc = MockMvcBuilders.standaloneSetup(rentalResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)
@@ -98,25 +90,6 @@ public class RentalResourceIntTest {
 
     @Test
     @Transactional
-    public void createRental() throws Exception {
-        int databaseSizeBeforeCreate = rentalRepository.findAll().size();
-
-        // Create the Rental
-        restRentalMockMvc.perform(post("/api/rentals")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(rental)))
-            .andExpect(status().isCreated());
-
-        // Validate the Rental in the database
-        List<Rental> rentalList = rentalRepository.findAll();
-        assertThat(rentalList).hasSize(databaseSizeBeforeCreate + 1);
-        Rental testRental = rentalList.get(rentalList.size() - 1);
-        assertThat(testRental.getStartDate()).isEqualTo(DEFAULT_START_DATE);
-        assertThat(testRental.getEndDate()).isEqualTo(DEFAULT_END_DATE);
-    }
-
-    @Test
-    @Transactional
     public void createRentalWithExistingId() throws Exception {
         int databaseSizeBeforeCreate = rentalRepository.findAll().size();
 
@@ -134,106 +107,6 @@ public class RentalResourceIntTest {
         assertThat(rentalList).hasSize(databaseSizeBeforeCreate);
     }
 
-    @Test
-    @Transactional
-    public void getAllRentals() throws Exception {
-        // Initialize the database
-        rentalRepository.saveAndFlush(rental);
-
-        // Get all the rentalList
-        restRentalMockMvc.perform(get("/api/rentals?sort=id,desc"))
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-            .andExpect(jsonPath("$.[*].id").value(hasItem(rental.getId().intValue())))
-            .andExpect(jsonPath("$.[*].startDate").value(hasItem(DEFAULT_START_DATE.toString())))
-            .andExpect(jsonPath("$.[*].endDate").value(hasItem(DEFAULT_END_DATE.toString())));
-    }
-
-    @Test
-    @Transactional
-    public void getRental() throws Exception {
-        // Initialize the database
-        rentalRepository.saveAndFlush(rental);
-
-        // Get the rental
-        restRentalMockMvc.perform(get("/api/rentals/{id}", rental.getId()))
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-            .andExpect(jsonPath("$.id").value(rental.getId().intValue()))
-            .andExpect(jsonPath("$.startDate").value(DEFAULT_START_DATE.toString()))
-            .andExpect(jsonPath("$.endDate").value(DEFAULT_END_DATE.toString()));
-    }
-
-    @Test
-    @Transactional
-    public void getNonExistingRental() throws Exception {
-        // Get the rental
-        restRentalMockMvc.perform(get("/api/rentals/{id}", Long.MAX_VALUE))
-            .andExpect(status().isNotFound());
-    }
-
-    @Test
-    @Transactional
-    public void updateRental() throws Exception {
-        // Initialize the database
-        rentalService.save(rental);
-
-        int databaseSizeBeforeUpdate = rentalRepository.findAll().size();
-
-        // Update the rental
-        Rental updatedRental = rentalRepository.findOne(rental.getId());
-        updatedRental
-            .startDate(UPDATED_START_DATE)
-            .endDate(UPDATED_END_DATE);
-
-        restRentalMockMvc.perform(put("/api/rentals")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(updatedRental)))
-            .andExpect(status().isOk());
-
-        // Validate the Rental in the database
-        List<Rental> rentalList = rentalRepository.findAll();
-        assertThat(rentalList).hasSize(databaseSizeBeforeUpdate);
-        Rental testRental = rentalList.get(rentalList.size() - 1);
-        assertThat(testRental.getStartDate()).isEqualTo(UPDATED_START_DATE);
-        assertThat(testRental.getEndDate()).isEqualTo(UPDATED_END_DATE);
-    }
-
-    @Test
-    @Transactional
-    public void updateNonExistingRental() throws Exception {
-        int databaseSizeBeforeUpdate = rentalRepository.findAll().size();
-
-        // Create the Rental
-
-        // If the entity doesn't have an ID, it will be created instead of just being updated
-        restRentalMockMvc.perform(put("/api/rentals")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(rental)))
-            .andExpect(status().isCreated());
-
-        // Validate the Rental in the database
-        List<Rental> rentalList = rentalRepository.findAll();
-        assertThat(rentalList).hasSize(databaseSizeBeforeUpdate + 1);
-    }
-
-    @Test
-    @Transactional
-    public void deleteRental() throws Exception {
-        // Initialize the database
-        rentalService.save(rental);
-
-        int databaseSizeBeforeDelete = rentalRepository.findAll().size();
-
-        // Get the rental
-        restRentalMockMvc.perform(delete("/api/rentals/{id}", rental.getId())
-            .accept(TestUtil.APPLICATION_JSON_UTF8))
-            .andExpect(status().isOk());
-
-        // Validate the database is empty
-        List<Rental> rentalList = rentalRepository.findAll();
-        assertThat(rentalList).hasSize(databaseSizeBeforeDelete - 1);
-    }
 
     @Test
     @Transactional
