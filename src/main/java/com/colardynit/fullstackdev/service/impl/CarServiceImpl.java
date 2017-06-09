@@ -1,14 +1,21 @@
 package com.colardynit.fullstackdev.service.impl;
 
-import com.colardynit.fullstackdev.service.CarService;
 import com.colardynit.fullstackdev.domain.Car;
 import com.colardynit.fullstackdev.repository.CarRepository;
+import com.colardynit.fullstackdev.service.CarService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.contains;
+import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.exact;
 
 
 /**
@@ -73,5 +80,22 @@ public class CarServiceImpl implements CarService{
     public void delete(Long id) {
         log.debug("Request to delete Car : {}", id);
         carRepository.delete(id);
+    }
+
+    @Override
+    public List<Car> findAllByExampleOf(Car car) {
+        if (car == null) {
+            car = new Car();
+            car.setAvailable(true); //only show the available cars
+        }
+        ExampleMatcher matcher = ExampleMatcher.matching().withIgnoreCase().withIgnoreNullValues()
+            .withMatcher("name", contains().ignoreCase())
+            .withMatcher("brand", exact())
+            .withMatcher("available", exact())
+            .withMatcher("categories", contains());
+        Example<Car> example = Example.of(car, matcher);
+
+        List<Car> cars = carRepository.findAll(example);
+        return cars;
     }
 }

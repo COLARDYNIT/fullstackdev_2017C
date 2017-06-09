@@ -5,8 +5,8 @@ import com.colardynit.fullstackdev.domain.Car;
 import com.colardynit.fullstackdev.service.CarService;
 import com.colardynit.fullstackdev.web.rest.util.HeaderUtil;
 import com.colardynit.fullstackdev.web.rest.util.PaginationUtil;
-import io.swagger.annotations.ApiParam;
 import io.github.jhipster.web.util.ResponseUtil;
+import io.swagger.annotations.ApiParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -122,5 +121,11 @@ public class CarResource {
         log.debug("REST request to delete Car : {}", id);
         carService.delete(id);
         return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
+    }
+
+    @GetMapping("/cars/search")
+    public List<Car> findCarByCriteria(@ModelAttribute Car car){
+        return carService.findAllByExampleOf(car);
+
     }
 }

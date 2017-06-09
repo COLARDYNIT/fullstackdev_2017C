@@ -4,6 +4,8 @@ import com.colardynit.fullstackdev.domain.Car;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 /**
  * Service Interface for managing Car.
  */
@@ -39,4 +41,6 @@ public interface CarService {
      *  @param id the id of the entity
      */
     void delete(Long id);
+
+    List<Car> findAllByExampleOf(Car car);
 }
